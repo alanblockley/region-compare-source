@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MD9BQ1DPDC"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-MD9BQ1DPDC');
+    </script>    
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Region Compare</title>
+    <link href="../assets/css/pulse/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Region Compare</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/service_list/index.html">Service List
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/region_compare/index.html">Region Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/service_gossip/index.html#">Service Gossip</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tool_kit/index.html">Tool Kit <span class="badge rounded-pill bg-info">NEW</span></a>                        
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="region-section" id="region">
+        <br />
+        <div class="container-lg">
+            <h1>AWS Services by Region</h1>
+            <p>Select your region that you want to query.</p>
+            <hr />
+        </div>
+        
+        <div class="container-lg">
+            <form>
+                <fieldset>
+                    <div class="row">
+                        <label for="strRegion" class="form-label mt-4">Region</label>
+                        <select class="form-select" id="strRegion">
+                          <option>Loading AWS regions...</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </section>
+    <hr />
+    <section class="services-section" id="services">
+        <div class="d-flex justify-content-center d-none" id="divStatus">
+            <div class="spinner-border" role="status">
+                <span class="sr-only"></span>
+            </div>
+        </div>        
+        <div class="container-lg d-none" id="divServicesByRegionCount">
+        
+        </div>
+        <div class="container-lg d-none" id="divServicesByRegion">
+            <table class="table table-hover" id="tableServicesByRegion">
+                <thead id="theadServicesByRegion">
+                    <tr>
+                        <th scope="col">Service Name</th>
+                        <th scope="col">Link</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbodyServicesByRegion">
+                    </tbody>                  
+            </table>
+        </div>
+    </section>
+
+    <script src="../assets/js/bootstrap/bootstrap.bundle.min.js" ></script>
+    <script src="../assets/js/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

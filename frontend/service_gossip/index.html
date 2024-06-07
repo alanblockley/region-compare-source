@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MD9BQ1DPDC"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-MD9BQ1DPDC');
+    </script>    
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Region Compare</title>
+    <link href="../assets/css/pulse/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Region Compare</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/service_list/index.html">Service List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/region_compare/index.html">Region Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/service_gossip/index.html">Service Gossip
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tool_kit/index.html">Tool Kit <span class="badge rounded-pill bg-info">NEW</span></a>                        
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="region-section" id="region">
+        <br />
+        <div class="container-lg">
+            <h1>AWS Service Gossip</h1>
+            <p>The movers and shakers of the services world. </p>
+        </div>
+    </section>
+    <hr />
+    <section class="services-section" id="services">
+        <div class="d-flex justify-content-center d-none" id="divStatus">
+            <div class="spinner-border" role="status">
+                <span class="sr-only"></span>
+            </div>
+        </div>        
+        <div class="container-lg d-none" id="divServicesByRegionCount">
+        
+        </div>
+        <div class="container-lg" id="divServicesByRegion">
+            <label for="serviceGossip" class="form-label mt-4">Service Gossip:</label>
+            <textarea class="form-control" id="serviceGossip" rows="30" readonly spellcheck="false">Loading...</textarea>
+            <span><i>Timestamps are UTC</i></span>
+        </div>
+        
+    </section>
+
+    <script src="../assets/js/bootstrap/bootstrap.bundle.min.js" ></script>
+    <script src="../assets/js/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>
