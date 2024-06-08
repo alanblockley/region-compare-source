@@ -1,3 +1,7 @@
+# Author: Alan Blockley
+# Date: 2024-05-26
+# ---
+
 import os
 import json
 import boto3
