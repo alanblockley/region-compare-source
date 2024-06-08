@@ -8,6 +8,11 @@ on:
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read    
+      
     env:
       AWS_REGION : "ap-southeast-2"
     steps:
