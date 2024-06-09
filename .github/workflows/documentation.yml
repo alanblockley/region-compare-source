@@ -63,7 +63,7 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
-            python generate_docs.py "$file" docs/
+            python .github/workflows/generate_docs.py "$file" docs/
           done
           ls -la
 
