@@ -43,6 +43,7 @@ jobs:
             role-to-assume: arn:aws:iam::168420111683:role/dbla-livedemo-github-oidc 
             role-session-name: GitHub_to_AWS_via_FederatedOIDC
             aws-region: ${{ env.AWS_REGION }}
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
