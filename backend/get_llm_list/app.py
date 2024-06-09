@@ -1,5 +1,4 @@
 # Author: Alan Blockley
-# Date: 
 # ---
 
 import os
