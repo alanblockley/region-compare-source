@@ -1,10 +1,26 @@
 name: Generate Documentation
 
+
 on:
   push:
     paths:
       - '**/*.py'
-
+      - '**/*.html'
+      - '**/*.js'
+      - '**/*.java'
+      - '**/*.cpp'
+      - '**/*.c'
+      - '**/*.cs'
+      - '**/*.rb'
+      - '**/*.go'
+      - '**/*.php'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.jsx'
+      - '**/*.swift'
+      - '**/*.kt'
+      - '**/*.rs'
+      
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
@@ -15,6 +31,8 @@ jobs:
       
     env:
       AWS_REGION : "ap-southeast-2"
+      no_changes : "false"
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -33,11 +51,23 @@ jobs:
       - name: Install boto3
         run: pip3 install boto3==1.34.122
 
-      - name: Generate documentation
+      - name: Check for source file changes
+        id: check_changes
         run: |
-          for file in $(git diff --name-only HEAD~1 HEAD | grep '.py$'); do
+          git fetch --depth=2
+          git diff --name-only HEAD~1 HEAD | grep -E '\.(py|html|js|java|cpp|c|cs|rb|go|php|ts|tsx|jsx|swift|kt|rs)$' > files_to_process.txt
+          if [ ! -s files_to_process.txt ]; then
+            echo "No source file changes detected."
+            echo "no_changes=true" >> $GITHUB_ENV
+          fi        
+
+      - name: Generate documentation
+        if: env.no_changes != 'true'
+        run: |
+          mkdir -p docs
+          while IFS= read -r file; do
             python generate_docs.py "$file" docs/
-          done
+          done < files_to_process.txt
           ls -la
 
       - name: Commit and push changes
