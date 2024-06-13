@@ -266,8 +266,8 @@ def send_push(msg):
     logger.debug("send_push", msg)
 
     payload = {
-    "app_key": "KWEP5uM0HvCJ78AlTDaA",
-    "app_secret": "eOK4Ky6V6TSBTB1Ws0o4mr976QH4AIC8ilO2vgERACE3FOh8aJ6w0KUZ8ZdNLGBX",
+    "app_key": "MYAPPKEY",
+    "app_secret": "MYAPPSECRET",
     "target_type": "app",
     "content": msg
     }
