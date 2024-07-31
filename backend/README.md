@@ -1,7 +1,9 @@
 # backend resources for region compare.
 
-Has code for following resources. 
+## Update 31-Jul-2024
+New features in development including RSS/Atom feed and FM ingestion improvements. 
 
+Has code for following resources: 
 --
   GetLLMListFunction:
     Type: AWS::Serverless::Function

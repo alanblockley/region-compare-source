@@ -1,9 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  backend
-
-  Sample SAM Template for backend
+Description: |
+  SAM Template for backend of region compare
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -14,40 +12,65 @@ Globals:
     Handler: app.lambda_handler
     Architectures:
       - arm64
+    Layers:
+      - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:bedrock-layer:1"
+    Environment:
+      Variables:
+        DEBUG: true
   Api:
     Cors:
-      AllowMethods: "'POST, GET'"
-      AllowHeaders: "'*'"
-      AllowOrigin: "'*'"
+      AllowMethods: '''POST, GET'''
+      AllowHeaders: '''*'''
+      AllowOrigin: '''*'''
 
 Parameters:
   ServicesJsonUrl:
     Type: String
     Description: URL to the JSON file containing the services data
-    Default: "https://api.regional-table.region-services.aws.a2z.com/index.json"
-  
+    Default: https://api.regional-table.region-services.aws.a2z.com/index.json
+
   SNSTopic:
     Type: String
     Description: SNS topic to publish notifications to
-    Default: "arn:aws:sns:ap-southeast-2:179204904059:dbla-prod-new-service-alert"
+    Default: dbla-dev-sns-topic
   
+  AlertsSNSTopic:
+    Type: String
+    Description: SNS topic to publish notifications to
+    Default: dbla-dev-alerts
+
   Hostname:
     Type: String
     Description: Hostname
-    Default: "region-compare.prod.dbla.tech"
+    Default: region-compare.domainname.com
 
   ZoneId:
     Type: String
     Description: Route53 zone ID
-    Default: "Z07368543OK0X3FAQR6S"
-  
+    Default: Z07368EXAMPLE3FAQR6S
+
   GlobalACMCert:
     Type: String
     Description: Global ACM certificate ARN
-    Default: "arn:aws:acm:us-east-1:179204904059:certificate/fd0d43f9-bf35-4f33-8fa4-95f72254668e"
+    Default: arn:aws:acm:us-east-1:179EXAMPLE59:certificate/fd0d43f9-bf35-4f33-8fa4-95example68e
+  
+  CachePolicyId:
+    Type: String
+    Description: Cache policy ID
+    Default: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+
+  PushedAppKeyValue:
+    Type: String
+    Description: App key for pushed.co app
+    Default: ""
+
+  PushedAppSecretValue:
+    Type: String
+    Description: Secret for pushing services announcements to pushed.co
+    Default: ""
 
 Resources:
-
+      
   GetLLMListFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -56,6 +79,7 @@ Resources:
         Variables:
           JSON_URL: !Ref ServicesJsonUrl
           REGION_DATA_TABLE: !Ref RegionDataTable
+          CURRENT_SERVICES_BUCKET: !Ref DataBucket
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref RegionDataTable
@@ -64,14 +88,14 @@ Resources:
               Effect: Allow
               Action:
                 - bedrock:*
-              Resource: "*"
+              Resource: '*'
       Events:
         GetLLMList:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /llm-list
             Method: get
-
+    
   GetVersionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -82,14 +106,14 @@ Resources:
           CURRENT_SERVICES_BUCKET: !Ref DataBucket
       Policies:
         - Statement:
-          - Sid: SSMParameterReadPolicy
-            Effect: Allow
-            Action:
-              - ssm:GetParameter
-            Resource: "*"
+            - Sid: SSMParameterReadPolicy
+              Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: '*'
       Events:
         GetVersion:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /version
             Method: get
@@ -105,18 +129,18 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref RegionDataTable
         - Statement:
-          - Sid: account
-            Effect: Allow
-            Action:
-              - account:ListRegions
-            Resource: "*"
+            - Sid: account
+              Effect: Allow
+              Action:
+                - account:ListRegions
+              Resource: '*'
       Events:
         GetRegions:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /regions
             Method: get
-  
+
   GetNewsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -129,13 +153,13 @@ Resources:
             TableName: !Ref ServiceNewsTable
       Events:
         GetNews:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /news
             Method: get
 
   GetServicesByRegionFunction:
-    Type: AWS::Serverless::Function 
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: get_services_by_region/
       Environment:
@@ -145,16 +169,16 @@ Resources:
           JSON_URL: !Ref ServicesJsonUrl
       Policies:
         - Statement:
-          - Sid: SSMParameterReadPolicy
-            Effect: Allow
-            Action:
-              - ssm:GetParameter
-            Resource: "*"
+            - Sid: SSMParameterReadPolicy
+              Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: '*'
         - S3ReadPolicy:
             BucketName: !Ref Bucket
       Events:
         GetServicesByRegion:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /services/{region}
             Method: get
@@ -171,6 +195,7 @@ Resources:
           JSON_URL: !Ref ServicesJsonUrl
           SNS_TOPIC: !Ref SNSTopic
           SQS_QUEUE: !Ref GenerateServiceNewsQueue
+          PUSHED_APP_SECRET: !Ref PushedAppSecret
       Policies:
         - Statement:
           - Sid: SSMParameterReadPolicy
@@ -181,27 +206,74 @@ Resources:
             Resource: "*"
         - S3FullAccessPolicy:
             BucketName: !Ref Bucket
+        - S3FullAccessPolicy:
+            BucketName: !Ref DataBucket
         - SQSSendMessagePolicy:
             QueueName: !GetAtt GenerateServiceNewsQueue.QueueName
+        - SNSPublishMessagePolicy:
+            TopicName: !Ref SNSTopic
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref PushedAppSecret
       Events:
         ScheduleDaily:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: "rate(1 minute)"
+            ScheduleExpression: rate(5 minute)
 
-  # Lambda function triggered by SQS
+  IngestLLMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ingest_llm/
+      Environment:
+        Variables:
+          JSON_URL: !Ref ServicesJsonUrl
+          REGION_DATA_TABLE: !Ref RegionDataTable
+          CURRENT_MD5_PARAMETER: !Ref CurrentModelsMD5Parameter
+          CURRENT_VERSION_PARAMETER: !Ref CurrentModelsVersionParameter
+          PREVIOUS_VERSION_PARAMETER: !Ref PreviousModelsVersionParameter
+          CURRENT_SERVICES_BUCKET: !Ref DataBucket
+          SNS_TOPIC: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${SNSTopic}
+          SQS_QUEUE: !Ref GenerateServiceNewsQueue
+          PUSHED_APP_SECRET: !Ref PushedAppSecret
+      Policies:
+        - Statement:
+            - Sid: SSMParameterReadPolicy
+              Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:PutParameter
+              Resource: '*'
+        - SNSPublishMessagePolicy:
+            TopicName: !Ref SNSTopic
+        - S3FullAccessPolicy:
+            BucketName: !Ref DataBucket
+        - DynamoDBReadPolicy:
+            TableName: !Ref RegionDataTable
+        - Statement:
+            - Sid: Bedrock
+              Effect: Allow
+              Action:
+                - bedrock:*
+              Resource: '*'
+      Events:
+        ScheduleDaily:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(5 minute)
+
   GenerateServiceNewsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: generate_service_news/
       Environment:
         Variables:
-          CURRENT_VERSION_PARAMETER: !Ref CurrentVersionParameter
-          PREVIOUS_VERSION_PARAMETER: !Ref PreviousVersionParameter
+          CURRENT_VERSION_PARAMETER: !Ref CurrentModelsVersionParameter
+          PREVIOUS_VERSION_PARAMETER: !Ref PreviousModelsVersionParameter
           CURRENT_SERVICES_BUCKET: !Ref DataBucket
           SERVICE_NEWS_TABLE: !Ref ServiceNewsTable
           JSON_URL: !Ref ServicesJsonUrl
-          SNS_TOPIC: !Ref SNSTopic
+          SNS_TOPIC: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${SNSTopic}
+          GENERATE_RSS_FEED_FUNCTION: !Ref GenerateRSSFeedFunction
       Policies:
         - Statement:
           - Sid: SSMParameterReadPolicy
@@ -219,13 +291,27 @@ Resources:
             BucketName: !Ref Bucket
         - DynamoDBWritePolicy:
             TableName: !Ref ServiceNewsTable
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GenerateRSSFeedFunction
       Events:
         SQSEvent:
           Type: SQS
           Properties:
             Queue: !GetAtt GenerateServiceNewsQueue.Arn
             BatchSize: 10
-  
+
+  # Not in production yet - slightly buggy ! 
+  GenerateRSSFeedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: generate_rss_feed/
+      Environment:
+        Variables:
+          REGION_DATA_TABLE: !Ref RegionDataTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RegionDataTable
+
   GenerateServiceNewsQueue:
     Type: AWS::SQS::Queue
 
@@ -389,6 +475,39 @@ Resources:
       Name: /regional-services/previous_version
       Type: String
       Value: "1"
+
+  CurrentModelsVersionParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /regional-services/current_models_version
+      Type: String
+      Value: '1'
+
+  PreviousModelsVersionParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /regional-services/previous_models_version
+      Type: String
+      Value: '1'
+
+  CurrentModelsMD5Parameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /regional-services/current_models_md5
+      Type: String
+      Value: '1'
+
+  PushedAppSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Pushed API Key
+      SecretString: !Join
+        - ''
+        - - '{"PUSHED_APP_KEY":"'
+          - !Ref PushedAppKeyValue
+          - '", "PUSHED_APP_SECRET":"'
+          - !Ref PushedAppSecretValue
+          - '"}'
 
   DNSEntry:
     Type: AWS::Route53::RecordSetGroup

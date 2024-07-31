@@ -28,7 +28,6 @@ case $2 in
 
         # Copy frontend to S3 bucket
         aws s3 cp --recursive ../frontend/ s3://$BUCKET/ --exclude 'data/*'
-        aws s3 cp --recursive ../frontend/data/ s3://$DATABUCKET/data/
         
         # Invalidate CloudFront cache
         aws cloudfront create-invalidation --distribution-id $distributionId --paths "/*.*" --region $REGION
@@ -36,14 +35,13 @@ case $2 in
     FRONTEND)
         # Copy frontend to S3 bucket
         aws s3 cp --recursive ../frontend/ s3://$BUCKET/ --exclude 'data/*'
-        aws s3 cp --recursive ../frontend/data/ s3://$DATABUCKET/data/
 
         # Invalidate CloudFront cache
         aws cloudfront create-invalidation --distribution-id $distributionId --paths "/*.*" --region $REGION
         ;;
     BACKEND)
         # Build and deploy the stack
-        sam build && sam deploy --config-env elasticstream
+        sam build && sam deploy --config-env $ENV
         ;;
     *)
         echo "Invalid command"

@@ -391,7 +391,7 @@ function getNews() {
 function getLLMList() {
     $.ajax({
         type: "GET",
-        url: apiUrl + "/llm-list",
+        url: "/data/models/latest.json",
         headers: {
             'Access-Control-Allow-Origin': "*",
             'Access-Control-Allow-Headers': 'Content-Type',
@@ -414,13 +414,9 @@ function getLLMList() {
                 $el.empty();
                 $el.append($("<option disabled selected></option>")
                     .attr("value", "").text("Select a region"));
-                $.each(data['regions'], function(key, value) {
-                    $.each(data['region_data'], function(data_key, data_value) {
-                        if (data_value['id'] == value['region']) {
-                            $el.append($("<option></option>")
-                            .attr("value", value['region']).text(data_value['continent'] + " (" + data_value['name'] + ") - " + value['region']));
-                            }
-                    });
+                $.each(data['regions_data'], function(key, value) {
+                    $el.append($("<option></option>")
+                    .attr("value", value['id']).text(value['continent'] + " (" + value['name'] + ") - " + value['id']));
                 });
             }            
 
@@ -431,9 +427,9 @@ function getLLMList() {
                 count = count + 1;
                 var strDomId = value[1].replace(/\W/g, '');
                 if (count % 2 == 0) {
-                    $el.append("<tr class=\"table-secondary\"><th scope=\"row\">" + value[1] + "</th><td id=\"region1_" + strDomId + "\"></td><td id=\"region2_" + strDomId + "\"></td><td id=\"region3_" + strDomId + "\"></td></tr>");
+                    $el.append("<tr class=\"table-secondary\"><td scope=\"row\"><b>" + value[0] + "</b><br /><span style=\"font-family:'Courier New'\">" + value[1] + "</span></td><td id=\"region1_" + strDomId + "\"></td><td id=\"region2_" + strDomId + "\"></td><td id=\"region3_" + strDomId + "\"></td></tr>");
                 } else {
-                    $el.append("<tr class=\"table-primary\"><th scope=\"row\">" + value[1] + "</th><td id=\"region1_" + strDomId + "\"></td><td id=\"region2_" + strDomId + "\"></td><td id=\"region3_" + strDomId + "\"></td></tr>");
+                    $el.append("<tr class=\"table-primary\"><td scope=\"row\"><b>" + value[0] + "</b><br /><span style=\"font-family:'Courier New'\">" + value[1] + "</span></td><td id=\"region1_" + strDomId + "\"></td><td id=\"region2_" + strDomId + "\"></td><td id=\"region3_" + strDomId + "\"></td></tr>");
                 }
             });
 
@@ -441,7 +437,7 @@ function getLLMList() {
             $("#divStatus_content").addClass("d-none");
             $("#divLLMCompare").removeClass("d-none");
 
-            llmsByRegion = data['regions']
+            llmsByRegion = data['model_by_region'];
 
         },
         error: function(data) {
