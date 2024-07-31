@@ -1,0 +1,79 @@
+name: Generate Documentation
+
+
+on:
+  push:
+    paths:
+      - '**/*.py'
+      - '**/*.html'
+      - '**/*.js'
+      - '**/*.java'
+      - '**/*.cpp'
+      - '**/*.c'
+      - '**/*.cs'
+      - '**/*.rb'
+      - '**/*.go'
+      - '**/*.php'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.jsx'
+      - '**/*.swift'
+      - '**/*.kt'
+      - '**/*.rs'
+      
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read    
+      
+    env:
+      AWS_REGION : "ap-southeast-2"
+      no_changes : "false"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: AWS Authentication
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+            role-to-assume: arn:aws:iam::168420111683:role/dbla-livedemo-github-oidc 
+            role-session-name: GitHub_to_AWS_via_FederatedOIDC
+            aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install boto3
+        run: pip3 install boto3==1.34.122
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
+        # with:
+        #   since_last_remote_commit: true 
+
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            python .github/workflows/generate_docs.py "$file" docs/
+          done
+          ls -la
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A docs/
+          git commit -m 'Add generated documentation'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
